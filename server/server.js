@@ -54,29 +54,63 @@ app.post(
   stripeWebhooks
 );
 
-// Middleware
-app.use(express.json());
-app.use(cors());
-app.use(clerkMiddleware());
-app.use(express.static("public"));
-
-// Debug middleware to log all requests
+// Enhanced request logging middleware
 app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  console.log("\n🌐 New Request ----------------");
+  console.log(`📝 ${req.method} ${req.url}`);
   console.log(
-    "Request headers authorization:",
+    "🔑 Authorization:",
     req.headers.authorization ? "Present" : "Missing"
   );
+  console.log("📍 Path:", req.path);
+  console.log("🔄 Original URL:", req.originalUrl);
+  if (req.headers.authorization) {
+    console.log(
+      "🎫 Token:",
+      req.headers.authorization.substring(0, 20) + "..."
+    );
+  }
+  console.log("----------------------------");
   next();
 });
 
-// Routes
-app.get("/", (req, res) => {
-  res.send("Server is live!");
+// Essential middleware
+app.use(express.json());
+app.use(
+  cors({
+    origin: ["http://localhost:5173", "http://localhost:3000"],
+    credentials: true,
+    exposedHeaders: ["Authorization"],
+  })
+);
+
+// Clerk middleware with error handling
+app.use((req, res, next) => {
+  clerkMiddleware()(req, res, (err) => {
+    if (err) {
+      console.error("❌ Clerk middleware error:", err);
+      return res
+        .status(401)
+        .json({ success: false, message: "Authentication error" });
+    }
+    next();
+  });
 });
 
-app.get("*name", (req, res) => {
-  res.sendFile(path.resolve("./public/index.html"));
+// API Routes - must be before static file serving
+app.use("/api/inngest", serve({ client: inngest, functions }));
+app.use("/api/show", showRouter);
+app.use("/api/booking", bookingRouter);
+app.use("/api/admin", adminRouter);
+app.use("/api/user", userRouter);
+
+// Static file serving
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+app.use(express.static(path.join(__dirname, "public")));
+
+// Handle root route
+app.get("/", (req, res) => {
+  res.send("Server is live!");
 });
 
 // Error handling middleware
