@@ -10,6 +10,8 @@ import bookingRouter from "./Routes/bookingrouter.js";
 import adminRouter from "./Routes/adminrouter.js";
 import userRouter from "./Routes/userrouter.js";
 import { stripeWebhooks } from "./Control/Stripewebhooks.js";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const app = express();
 const port = 3000;
@@ -56,6 +58,7 @@ app.post(
 app.use(express.json());
 app.use(cors());
 app.use(clerkMiddleware());
+app.use(express.static("public"));
 
 // Debug middleware to log all requests
 app.use((req, res, next) => {
@@ -70,6 +73,10 @@ app.use((req, res, next) => {
 // Routes
 app.get("/", (req, res) => {
   res.send("Server is live!");
+});
+
+app.get("*name", (req, res) => {
+  res.sendFile(path.resolve("./public/index.html"));
 });
 
 // Error handling middleware
