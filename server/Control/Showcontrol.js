@@ -29,7 +29,7 @@ export const getnowplayingMovies = async (req, res) => {
           Accept: "application/json",
           "Content-Type": "application/json",
         },
-        timeout: 10000, // 10 second timeout
+  timeout: 20000, // 20 second timeout (increased to reduce false timeouts)
       }
     );
 
@@ -58,15 +58,46 @@ export const getnowplayingMovies = async (req, res) => {
 
     console.log("✅ Sending response to frontend");
     res.json({ success: true, movies: movies });
+    return;
   } catch (error) {
     console.error("❌ ERROR in getnowplayingMovies:");
     console.error("❌ Error message:", error.message);
     console.error("❌ Response status:", error.response?.status);
     console.error("❌ Response data:", error.response?.data);
     console.error("❌ Request config:", error.config?.url);
+    // If TMDB is unreachable (network error or timeout), return cached movies from DB if available
+    try {
+      console.log("🔁 Attempting fallback: loading movies from local DB...");
+      const cached = await Movie.find({})
+        .sort({ popularity: -1 })
+        .limit(20)
+        .lean();
+
+      if (cached && cached.length > 0) {
+        console.log("✅ Fallback succeeded - returning", cached.length, "movies from DB");
+        
+        // Transform cached movies to match frontend expectations (convert _id to id)
+        const transformedMovies = cached.map(movie => ({
+          ...movie,
+          id: movie._id
+        }));
+        
+        return res.json({
+          success: true,
+          source: "cache",
+          message:
+            "TMDB unreachable; returning cached movies from the database.",
+          movies: transformedMovies,
+        });
+      }
+    } catch (fallbackError) {
+      console.error("❌ Fallback error:", fallbackError.message);
+    }
+
+    // No cached data available - return the original error
     res.json({
       success: false,
-      message: error.message,
+      message: "TMDB fetch failed: " + (error?.message || "unknown error"),
       details: error.response?.data,
     });
   }

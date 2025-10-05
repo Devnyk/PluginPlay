@@ -111,15 +111,15 @@ const Addshow = () => {
     <div className="grid gap-4 mt-3 grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
       {nowPlayingMovies.slice(0, 22).map((movie, index) => (
         <div
-          key={index}
+          key={movie.id}
           className={`rounded-lg relative cursor-pointer hover:-translate-y-1.5 transition duration-300`}
-          onClick={() =>
-            !selectedMovie
-              ? setSelectedMovie(movie.id)
-              : selectedMovie !== movie.id
-              ? setSelectedMovie(movie.id)
-              : setSelectedMovie(null)
-          }
+          onClick={() => {
+            if (selectedMovie === movie.id) {
+              setSelectedMovie(null);
+            } else {
+              setSelectedMovie(movie.id);
+            }
+          }}
         >
           <div className="relative">
             <img
