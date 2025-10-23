@@ -1,4 +1,4 @@
-# QuickShow – MERN Movie Ticket Booking System
+# PluginPlay – MERN Movie Ticket Booking System
 ### A fully functional full-stack MERN movie ticket booking web app built with Inngest, Nodemailer, Stripe, and Clerk for a seamless and secure movie experience.
 
 ### 🚀 Features : --
@@ -6,7 +6,7 @@
 
 🔐 Authentication via Clerk
 
-💳 Secure Payments using Stripe
+💳 Secure Payments using RazorPay
 
 📧 Email Notifications with Nodemailer
 
@@ -30,8 +30,8 @@
 ![Bookings](./Screenshots/Bookings.png)
 ### Dashboard Page
 ![Dashboard](./Screenshots/Dashboard.png)
-### List Shows Page
-![ListShows](./Screenshots/Listshows.png)
+### All Movies & Shows Page
+![ListShows](./Screenshots/All-Movies.png)
 ### List Bookings Page
 ![ListBookings](./Screenshots/Listbookings.png)
 
